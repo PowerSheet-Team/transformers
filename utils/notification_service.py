@@ -773,6 +773,27 @@ class Message:
             with open(file_path, "w", encoding="UTF-8") as fp:
                 fp.write(failure_text)
 
+            client.chat_postMessage(
+                channel=SLACK_REPORT_CHANNEL_ID,
+                text="Results for new failures",
+                blocks=blocks,
+                thread_ts=self.thread_ts["ts"],
+            )
+
+            try:
+                # Call the files.upload method using the WebClient
+                # Uploading files requires the `files:write` scope
+                result = client.files_upload(
+                    channels=SLACK_REPORT_CHANNEL_ID,
+                    initial_comment="Here's my file :smile:",
+                    file=file_path,
+                )
+                # Log the result
+                logger.info(result)
+
+            except SlackApiError as e:
+                logger.error("Error uploading file: {}".format(e))
+
 
 def retrieve_artifact(artifact_path: str, gpu: Optional[str]):
     if gpu not in [None, "single", "multi"]:
