@@ -1228,10 +1228,13 @@ if __name__ == "__main__":
     # if is_scheduled_ci_run:
     if True:
         file_path = os.path.join(os.getcwd(), f"ci_results_{job_name}/new_model_failures.txt")
-        api.upload_file(
+        commit_info = api.upload_file(
             path_or_fileobj=file_path,
             path_in_repo=f"{datetime.datetime.today().strftime('%Y-%m-%d')}/ci_results_{job_name}/new_model_failures.txt",
             repo_id="hf-internal-testing/transformers_daily_ci",
             repo_type="dataset",
             token=os.environ.get("TRANSFORMERS_CI_RESULTS_UPLOAD_TOKEN", None),
         )
+        print(commit_info.commit_url)
+        url = f"https://huggingface.co/datasets/hf-internal-testing/transformers_daily_ci/blob/{commit_info.oid}/{datetime.datetime.today().strftime('%Y-%m-%d')}/ci_results_{job_name}/new_model_failures.txt"
+        print(url)
