@@ -773,23 +773,6 @@ class Message:
             with open(file_path, "w", encoding="UTF-8") as fp:
                 fp.write(failure_text)
 
-            client.chat_postMessage(
-                channel=SLACK_REPORT_CHANNEL_ID,
-                text="Results for new failures",
-                blocks=blocks,
-                thread_ts=self.thread_ts["ts"],
-                attachments=[{"pretext": "pre-hello", "text": "text-world"}],
-            )
-
-            # Call the files.upload method using the WebClient
-            # Uploading files requires the `files:write` scope
-            result = client.files_upload(
-                channels=SLACK_REPORT_CHANNEL_ID,
-                initial_comment="Here's my file :smile:",
-                file=file_path,
-            )
-
-
 
 def retrieve_artifact(artifact_path: str, gpu: Optional[str]):
     if gpu not in [None, "single", "multi"]:
@@ -1240,3 +1223,15 @@ if __name__ == "__main__":
     if message.n_failures or (ci_event != "push" and not ci_event.startswith("Push CI (AMD)")):
         message.post()
         message.post_reply()
+
+    # upload results to Hub dataset (only for the scheduled daily CI run on `main`)
+    # if is_scheduled_ci_run:
+    if True:
+        file_path = os.path.join(os.getcwd(), f"ci_results_{job_name}/new_model_failures.txt")
+        api.upload_file(
+            path_or_fileobj=file_path,
+            path_in_repo=f"{datetime.datetime.today().strftime('%Y-%m-%d')}/ci_results_{job_name}/new_model_failures.txt",
+            repo_id="hf-internal-testing/transformers_daily_ci",
+            repo_type="dataset",
+            token=os.environ.get("TRANSFORMERS_CI_RESULTS_UPLOAD_TOKEN", None),
+        )
