@@ -529,33 +529,29 @@ class Message:
                 fp.write(failure_text)
 
             # upload results to Hub dataset (only for the scheduled daily CI run on `main`)
-            # if is_scheduled_ci_run:
-            if True:
-                file_path = os.path.join(os.getcwd(), f"ci_results_{job_name}/new_model_failures.txt")
-                commit_info = api.upload_file(
-                    path_or_fileobj=file_path,
-                    path_in_repo=f"{datetime.datetime.today().strftime('%Y-%m-%d')}/ci_results_{job_name}/new_model_failures.txt",
-                    repo_id="hf-internal-testing/transformers_daily_ci",
-                    repo_type="dataset",
-                    token=os.environ.get("TRANSFORMERS_CI_RESULTS_UPLOAD_TOKEN", None),
-                )
-                print(commit_info.commit_url)
-                url = f"https://huggingface.co/datasets/hf-internal-testing/transformers_daily_ci/raw/{commit_info.oid}/{datetime.datetime.today().strftime('%Y-%m-%d')}/ci_results_{job_name}/new_model_failures.txt"
-                print(url)
+            file_path = os.path.join(os.getcwd(), f"ci_results_{job_name}/new_model_failures.txt")
+            commit_info = api.upload_file(
+                path_or_fileobj=file_path,
+                path_in_repo=f"{datetime.datetime.today().strftime('%Y-%m-%d')}/ci_results_{job_name}/new_model_failures.txt",
+                repo_id="hf-internal-testing/transformers_daily_ci",
+                repo_type="dataset",
+                token=os.environ.get("TRANSFORMERS_CI_RESULTS_UPLOAD_TOKEN", None),
+            )
+            url = f"https://huggingface.co/datasets/hf-internal-testing/transformers_daily_ci/raw/{commit_info.oid}/{datetime.datetime.today().strftime('%Y-%m-%d')}/ci_results_{job_name}/new_model_failures.txt"
 
-                block = {
-                    "type": "section",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "bonjour",
-                    },
-                    "accessory": {
-                        "type": "button",
-                        "text": {"type": "plain_text", "text": "Check New model failures"},
-                        "url": url,
-                    },
-                }
-                blocks.append(block)
+            block = {
+                "type": "section",
+                "text": {
+                    "type": "plain_text",
+                    "text": "bonjour",
+                },
+                "accessory": {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text": "Check New model failures"},
+                    "url": url,
+                },
+            }
+            blocks.append(block)
 
         return json.dumps(blocks)
 
